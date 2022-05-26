@@ -1,0 +1,17 @@
+attrs==21.4.0
+aws-cdk-lib==2.25.0
+cattrs==22.1.0
+constructs==10.1.17
+exceptiongroup==1.0.0rc7
+iniconfig==1.1.1
+jsii==1.59.0
+packaging==21.3
+pluggy==1.0.0
+publication==0.0.3
+py==1.11.0
+pyparsing==3.0.9
+pytest==6.2.5
+python-dateutil==2.8.2
+six==1.16.0
+toml==0.10.2
+typing_extensions==4.2.0
