@@ -1,10 +1,16 @@
+from cmath import log
+import logging
+from datetime import date
+import re
 from aws_cdk import (
+    RemovalPolicy,
     Stack,
     aws_ec2 as ec2,
     aws_ecs as ecs,
     aws_ecs_patterns as ecs_patterns,
     aws_elasticloadbalancingv2 as elbv2,
-    aws_ssm as ssm
+    aws_ssm as ssm,
+    aws_logs as logs
 )
 from constructs import Construct
 
@@ -17,7 +23,6 @@ class ECSStack(Stack):
         construct_id: str,
         vpc: ec2.Vpc,
         ecs_cluster: ecs.Cluster,
-        # env_vars: dict,
         secrets: dict,
         task_cpu: int = 256,
         task_memory_mib: int = 1024,
@@ -30,7 +35,6 @@ class ECSStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
         self.vpc = vpc
         self.ecs_cluster = ecs_cluster
-        #self.env_vars = env_vars
         self.secrets = secrets
         self.task_cpu = task_cpu
         self.task_memory_mib = task_memory_mib
@@ -41,17 +45,21 @@ class ECSStack(Stack):
         # Prepare parameters
         self.container_name = f"django_app"
 
+        self.log_group = logs.LogGroup(
+            self,
+            "ECSLogGroup",
+            log_group_name=f"ECSLogGroup",
+            removal_policy=RemovalPolicy.DESTROY
+        )
+
         # Create the load balancer, ECS service and fargate task for teh Django App
         self.alb_fargate_service = ecs_patterns.ApplicationLoadBalancedFargateService(
             self,
-            f"MyDjangoApp",
+            "MyDjangoApp",
             protocol=elbv2.ApplicationProtocol.HTTP,
             redirect_http=False,
             platform_version=ecs.FargatePlatformVersion.VERSION1_4,
             cluster=self.ecs_cluster,  # Required
-            # task_subnets=ec2.SubnetSelection(
-            #     subnet_type=ec2.SubnetType.PUBLIC),
-            # assign_public_ip=True,
             task_subnets=ec2.SubnetSelection(
                 subnet_type=ec2.SubnetType.PRIVATE_ISOLATED),
             #assign_public_ip=False,
@@ -65,8 +73,11 @@ class ECSStack(Stack):
                 ),
                 container_name=self.container_name,
                 container_port=8000,
-                # environment=self.env_vars,
-                secrets=self.secrets
+                secrets=self.secrets,
+                log_driver=ecs.LogDriver.aws_logs(
+                   log_group=self.log_group,
+                   stream_prefix=f"DjangoAppTest"
+                )
             ),
             public_load_balancer=True
         )

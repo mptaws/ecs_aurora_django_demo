@@ -1,9 +1,11 @@
 from aws_cdk import (
     Duration,
+    RemovalPolicy,
     Stack,
     aws_rds as rds,
     aws_ec2 as ec2,
-    aws_ssm as ssm
+    aws_ssm as ssm,
+    aws_logs as logs
 )
 from constructs import Construct
 
@@ -42,6 +44,7 @@ class DatabaseStack(Stack):
             backup_retention=Duration.days(
                 self.backup_retention_days),  # 1 day retention is free
             deletion_protection=False,
+            removal_policy=RemovalPolicy.DESTROY,
             # Allow running queries in AWS console (free)
             enable_data_api=True,
             # parameter_group=rds.ParameterGroup.from_parameter_group_name(  # Specify the postgresql version
@@ -59,7 +62,7 @@ class DatabaseStack(Stack):
                 auto_pause=Duration.minutes(self.auto_pause_minutes),
                 min_capacity=self.min_capacity,
                 max_capacity=self.max_capacity
-            ),
+            )
         )
         # Allow ingress traffic from ECS tasks
         self.aurora_serverless_db.connections.allow_default_port_from_any_ipv4(
