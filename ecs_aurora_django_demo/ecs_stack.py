@@ -17,7 +17,7 @@ class ECSStack(Stack):
         construct_id: str,
         vpc: ec2.Vpc,
         ecs_cluster: ecs.Cluster,
-        #env_vars: dict,
+        # env_vars: dict,
         secrets: dict,
         task_cpu: int = 256,
         task_memory_mib: int = 1024,
@@ -49,9 +49,12 @@ class ECSStack(Stack):
             redirect_http=False,
             platform_version=ecs.FargatePlatformVersion.VERSION1_4,
             cluster=self.ecs_cluster,  # Required
+            # task_subnets=ec2.SubnetSelection(
+            #     subnet_type=ec2.SubnetType.PUBLIC),
+            # assign_public_ip=True,
             task_subnets=ec2.SubnetSelection(
-                subnet_type=ec2.SubnetType.PUBLIC),
-            assign_public_ip=True,
+                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED),
+            #assign_public_ip=False,
             cpu=self.task_cpu,  # Default is 256
             memory_limit_mib=self.task_memory_mib,  # Default is 512
             desired_count=self.task_desired_count,  # Default is 1
@@ -62,7 +65,7 @@ class ECSStack(Stack):
                 ),
                 container_name=self.container_name,
                 container_port=8000,
-                #environment=self.env_vars,
+                # environment=self.env_vars,
                 secrets=self.secrets
             ),
             public_load_balancer=True

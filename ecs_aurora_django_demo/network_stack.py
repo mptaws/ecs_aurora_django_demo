@@ -17,12 +17,30 @@ class NetworkStack(Stack):
             self,
             "VPC",
             max_azs=2,  # default is all AZs in region
-            nat_gateways=0,  # No Nat GWs are required as we will add VPC endpoints
+            nat_gateways=0,
             enable_dns_hostnames=True,
             enable_dns_support=True
         )
         self.ecs_cluster = ecs.Cluster(self, f"ECSCluster", vpc=self.vpc)
-        # Add VPC endpoints to keep the traffic inside AWS
+        
+        self.s3_private_link = ec2.GatewayVpcEndpoint(
+            self,
+            "S3GWEndpoint",
+            vpc=self.vpc,
+            service=ec2.GatewayVpcEndpointAwsService.S3
+        )
+        # Create a security group for our endpoints
+        security_group = ec2.SecurityGroup(
+            self, "ECR-SG",
+            vpc=self.vpc,
+            allow_all_outbound=True
+        )
+
+        # Allow 443 inbound on our Security Group
+        security_group.add_ingress_rule(
+            ec2.Peer.ipv4(self.vpc.vpc_cidr_block),
+            ec2.Port.tcp(443)
+        )
 
         self.ecr_api_private_link = ec2.InterfaceVpcEndpoint(
             self,
@@ -30,7 +48,11 @@ class NetworkStack(Stack):
             vpc=self.vpc,
             service=ec2.InterfaceVpcEndpointAwsService.ECR,
             open=True,
-            private_dns_enabled=True
+            private_dns_enabled=True,
+            security_groups=[security_group],
+            subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
+            )
         )
         self.ecr_dkr_private_link = ec2.InterfaceVpcEndpoint(
             self,
@@ -38,7 +60,11 @@ class NetworkStack(Stack):
             vpc=self.vpc,
             service=ec2.InterfaceVpcEndpointAwsService.ECR_DOCKER,
             open=True,
-            private_dns_enabled=True
+            private_dns_enabled=True,
+            security_groups=[security_group],
+            subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
+            )
         )
         self.cloudwatch_private_link = ec2.InterfaceVpcEndpoint(
             self,
