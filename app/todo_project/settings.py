@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_mysql',
+    'health_check',
     'todo_app',
 
 ]
@@ -86,6 +87,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ['DB_NAME'],
+        "OPTIONS": {
+            # Tell MySQLdb to connect with 'utf8mb4' character set
+            "charset": "utf8mb4",
+        },
         'USER': os.environ['USERNAME'],
         'PASSWORD': os.environ['PASSWORD'],
         # Or an IP Address that your DB is hosted on

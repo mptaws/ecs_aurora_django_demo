@@ -31,6 +31,14 @@ class DatabaseStack(Stack):
         self.max_capacity = max_capacity
         self.auto_pause_minutes = auto_pause_minutes
         self.backup_retention_days = backup_retention_days
+        
+        self.log_group = logs.LogGroup(
+            self,
+            "ECSDatabaseLogGroup",
+            log_group_name=f"ECSDatabaseLogGroup",
+            removal_policy=RemovalPolicy.DESTROY,
+            retention=logs.RetentionDays.ONE_DAY
+        )
 
         self.aurora_serverless_db = rds.ServerlessCluster(
             self,

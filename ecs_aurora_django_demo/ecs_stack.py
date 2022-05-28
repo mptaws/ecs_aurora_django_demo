@@ -49,7 +49,8 @@ class ECSStack(Stack):
             self,
             "ECSLogGroup",
             log_group_name=f"ECSLogGroup",
-            removal_policy=RemovalPolicy.DESTROY
+            removal_policy=RemovalPolicy.DESTROY,
+            retention=logs.RetentionDays.ONE_DAY
         )
 
         # Create the load balancer, ECS service and fargate task for teh Django App
@@ -62,7 +63,6 @@ class ECSStack(Stack):
             cluster=self.ecs_cluster,  # Required
             task_subnets=ec2.SubnetSelection(
                 subnet_type=ec2.SubnetType.PRIVATE_ISOLATED),
-            #assign_public_ip=False,
             cpu=self.task_cpu,  # Default is 256
             memory_limit_mib=self.task_memory_mib,  # Default is 512
             desired_count=self.task_desired_count,  # Default is 1
@@ -76,17 +76,17 @@ class ECSStack(Stack):
                 secrets=self.secrets,
                 log_driver=ecs.LogDriver.aws_logs(
                    log_group=self.log_group,
-                   stream_prefix=f"DjangoAppTest"
+                   stream_prefix=f"DjangoAppTest",
                 )
             ),
             public_load_balancer=True
         )
         # Set the health checks settings
-        # self.alb_fargate_service.target_group.configure_health_check(
-        #     path="/status/",
-        #     healthy_threshold_count=3,
-        #     unhealthy_threshold_count=2
-        # )
+        self.alb_fargate_service.target_group.configure_health_check(
+            path="/health_check/",
+            healthy_threshold_count=3,
+            unhealthy_threshold_count=2
+        )
         # Autoscaling based on CPU utilization
         scalable_target = self.alb_fargate_service.service.auto_scale_task_count(
             min_capacity=self.task_min_scaling_capacity,
