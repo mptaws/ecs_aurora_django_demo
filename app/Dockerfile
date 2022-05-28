@@ -3,13 +3,9 @@ FROM python:3.10.4-slim-buster
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN sudo apt-get autoremove
 RUN apt-get update --allow-releaseinfo-change \
     && apt-get install -y build-essential default-libmysqlclient-dev \
     && apt-get install -y python-mysqldb git gettext
-    
-RUN adduser --system --group app
-USER app
 
 RUN pip install --upgrade pip
 RUN pip install mysql-connector-python
@@ -24,8 +20,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /code/
 
 EXPOSE 8000
-
-RUN chown -R app:app /code
 
 RUN ["chmod", "+x", "entrypoint.sh"]
 ENTRYPOINT ["./entrypoint.sh"]
