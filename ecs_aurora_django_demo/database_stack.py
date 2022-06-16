@@ -31,7 +31,7 @@ class DatabaseStack(Stack):
         self.max_capacity = max_capacity
         self.auto_pause_minutes = auto_pause_minutes
         self.backup_retention_days = backup_retention_days
-        
+
         self.log_group = logs.LogGroup(
             self,
             "ECSDatabaseLogGroup",
@@ -43,7 +43,6 @@ class DatabaseStack(Stack):
         self.aurora_serverless_db = rds.ServerlessCluster(
             self,
             "AuroraServerlessCluster",
-            # engine=rds.DatabaseClusterEngine.AURORA_POSTGRESQL,
             engine=rds.DatabaseClusterEngine.AURORA_MYSQL,
             vpc=self.vpc,
             vpc_subnets=ec2.SubnetSelection(
@@ -53,13 +52,10 @@ class DatabaseStack(Stack):
                 self.backup_retention_days),  # 1 day retention is free
             deletion_protection=False,
             removal_policy=RemovalPolicy.DESTROY,
+
             # Allow running queries in AWS console (free)
             enable_data_api=True,
-            # parameter_group=rds.ParameterGroup.from_parameter_group_name(  # Specify the postgresql version
-            #     self,
-            #     "AuroraDBParameterGroup",
-            #     "default.aurora-postgresql10"  # Only this version is supported for Aurora Serverless now
-            # ),
+            
             parameter_group=rds.ParameterGroup.from_parameter_group_name(  # Specify the mysql version
                 self,
                 "AuroraDBParameterGroup",

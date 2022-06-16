@@ -18,10 +18,6 @@ aws_env = Environment(
     region=os.getenv('CDK_DEFAULT_REGION')
 )
 
-#app_env_vars = {
-#    "AWS_ACCOUNT_ID": os.getenv('CDK_DEFAULT_ACCOUNT')
-#}
-
 vpc = NetworkStack(
     app,
     "Network",
@@ -55,7 +51,6 @@ ECSStack(
     env=aws_env,
     vpc=vpc,
     ecs_cluster=vpc.ecs_cluster,
-    #env_vars=app_env_vars,
     secrets=secrets.app_secrets,
     task_cpu=256,
     task_memory_mib=512,

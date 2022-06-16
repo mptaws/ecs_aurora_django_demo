@@ -1,7 +1,5 @@
 from cmath import log
-import logging
 from datetime import date
-import re
 from aws_cdk import (
     RemovalPolicy,
     Stack,
