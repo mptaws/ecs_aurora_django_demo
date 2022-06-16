@@ -1,7 +1,9 @@
 
-# Welcome to your CDK Python project!
 
-This is a blank project for CDK development with Python.
+Django ECS Application Demo
+
+![](ECS-Aurora-Serverless.png)
+
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
