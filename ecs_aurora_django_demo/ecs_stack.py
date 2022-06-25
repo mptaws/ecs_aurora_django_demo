@@ -65,10 +65,11 @@ class ECSStack(Stack):
             memory_limit_mib=self.task_memory_mib,  # Default is 512
             desired_count=self.task_desired_count,  # Default is 1
             task_image_options=ecs_patterns.ApplicationLoadBalancedTaskImageOptions(
-                image=ecs.ContainerImage.from_asset(
-                    directory="app/",
-                    file="Dockerfile"
-                ),
+                # image=ecs.ContainerImage.from_asset(
+                #     directory="app/",
+                #     file="Dockerfile"
+                # ),
+                image=ecs.ContainerImage.from_registry("registry.hub.docker.com/mptaws/python-todo-app"),
                 container_name=self.container_name,
                 container_port=8000,
                 secrets=self.secrets,
