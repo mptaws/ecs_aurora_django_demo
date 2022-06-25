@@ -1,4 +1,4 @@
-FROM python:3.10.4-slim-buster
+FROM --platform=linux/amd64 python:3.10.4-slim-buster
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1

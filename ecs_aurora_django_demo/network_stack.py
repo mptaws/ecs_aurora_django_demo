@@ -22,7 +22,7 @@ class NetworkStack(Stack):
             enable_dns_support=True
         )
         self.ecs_cluster = ecs.Cluster(self, f"ECSCluster", vpc=self.vpc)
-        
+
         self.s3_private_link = ec2.GatewayVpcEndpoint(
             self,
             "S3GWEndpoint",
