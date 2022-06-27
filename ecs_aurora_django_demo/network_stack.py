@@ -83,19 +83,19 @@ class NetworkStack(Stack):
             private_dns_enabled=True
         )
 
-        # Save useful info in SSM for later usage
-        ssm.StringParameter(
-            self,
-            "VpcIdParam",
-            parameter_name=f"VpcId",
-            string_value=self.vpc.vpc_id
-        )
-        self.task_subnets = ssm.StringListParameter(
-            self,
-            "VpcPrivateSubnetsParam",
-            parameter_name=f"VpcPrivateSubnetsParam",
-            string_list_value=[
-                s.subnet_id
-                for s in self.vpc.select_subnets(subnet_type=ec2.SubnetType.PRIVATE_ISOLATED).subnets
-            ]
-        )
+        # # Save useful info in SSM for later usage
+        # ssm.StringParameter(
+        #     self,
+        #     "VpcIdParam",
+        #     parameter_name=f"VpcId",
+        #     string_value=self.vpc.vpc_id
+        # )
+        # self.task_subnets = ssm.StringListParameter(
+        #     self,
+        #     "VpcPrivateSubnetsParam",
+        #     parameter_name=f"VpcPrivateSubnetsParam",
+        #     string_list_value=[
+        #         s.subnet_id
+        #         for s in self.vpc.select_subnets(subnet_type=ec2.SubnetType.PRIVATE_ISOLATED).subnets
+        #     ]
+        # )

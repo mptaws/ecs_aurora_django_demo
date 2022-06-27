@@ -95,33 +95,33 @@ class ECSStack(Stack):
             target_utilization_percent=75,
         )
         # Save useful values in in SSM
-        self.ecs_cluster_name_param = ssm.StringParameter(
-            self,
-            "EcsClusterNameParam",
-            parameter_name=f"EcsClusterNameParam",
-            string_value=self.ecs_cluster.cluster_name
-        )
-        self.task_def_arn_param = ssm.StringParameter(
-            self,
-            "TaskDefArnParam",
-            parameter_name=f"TaskDefArnParam",
-            string_value=self.alb_fargate_service.task_definition.task_definition_arn
-        )
-        self.task_def_family_param = ssm.StringParameter(
-            self,
-            "TaskDefFamilyParam",
-            parameter_name=f"TaskDefFamilyParam",
-            string_value=f"family:{self.alb_fargate_service.task_definition.family}"
-        )
-        self.exec_role_arn_param = ssm.StringParameter(
-            self,
-            "TaskExecRoleArnParam",
-            parameter_name=f"TaskExecRoleArnParam",
-            string_value=self.alb_fargate_service.task_definition.execution_role.role_arn
-        )
-        self.task_role_arn_param = ssm.StringParameter(
-            self,
-            "TaskRoleArnParam",
-            parameter_name=f"TaskRoleArnParam",
-            string_value=self.alb_fargate_service.task_definition.task_role.role_arn
-        )
+        # self.ecs_cluster_name_param = ssm.StringParameter(
+        #     self,
+        #     "EcsClusterNameParam",
+        #     parameter_name=f"EcsClusterNameParam",
+        #     string_value=self.ecs_cluster.cluster_name
+        # )
+        # self.task_def_arn_param = ssm.StringParameter(
+        #     self,
+        #     "TaskDefArnParam",
+        #     parameter_name=f"TaskDefArnParam",
+        #     string_value=self.alb_fargate_service.task_definition.task_definition_arn
+        # )
+        # self.task_def_family_param = ssm.StringParameter(
+        #     self,
+        #     "TaskDefFamilyParam",
+        #     parameter_name=f"TaskDefFamilyParam",
+        #     string_value=f"family:{self.alb_fargate_service.task_definition.family}"
+        # )
+        # self.exec_role_arn_param = ssm.StringParameter(
+        #     self,
+        #     "TaskExecRoleArnParam",
+        #     parameter_name=f"TaskExecRoleArnParam",
+        #     string_value=self.alb_fargate_service.task_definition.execution_role.role_arn
+        # )
+        # self.task_role_arn_param = ssm.StringParameter(
+        #     self,
+        #     "TaskRoleArnParam",
+        #     parameter_name=f"TaskRoleArnParam",
+        #     string_value=self.alb_fargate_service.task_definition.task_role.role_arn
+        # )

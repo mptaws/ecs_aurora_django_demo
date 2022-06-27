@@ -7,7 +7,7 @@ from aws_cdk import (
 )
 from ecs_aurora_django_demo.network_stack import NetworkStack
 from ecs_aurora_django_demo.database_stack import DatabaseStack
-from ecs_aurora_django_demo.secrets_stack import ExternalSecretsStack
+from ecs_aurora_django_demo.secrets_stack import SecretsStack
 from ecs_aurora_django_demo.ecs_stack import ECSStack
 
 
@@ -35,9 +35,9 @@ database = DatabaseStack(
     auto_pause_minutes=10,
 )
 
-secrets = ExternalSecretsStack(
+secrets = SecretsStack(
     app,
-    "ExternalParameters",
+    "SecretsStack",
     env=Environment(
         account=os.getenv('CDK_DEFAULT_ACCOUNT'),
         region=os.getenv('CDK_DEFAULT_REGION')

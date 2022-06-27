@@ -6,7 +6,7 @@ from aws_cdk import (
 from constructs import Construct
 
 
-class ExternalSecretsStack(Stack):
+class SecretsStack(Stack):
 
     def __init__(
             self,
