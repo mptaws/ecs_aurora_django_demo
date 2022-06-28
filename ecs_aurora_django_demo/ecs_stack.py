@@ -1,5 +1,4 @@
-from cmath import log
-from datetime import date
+import uuid
 from aws_cdk import (
     RemovalPolicy,
     Stack,
@@ -7,7 +6,7 @@ from aws_cdk import (
     aws_ecs as ecs,
     aws_ecs_patterns as ecs_patterns,
     aws_elasticloadbalancingv2 as elbv2,
-    aws_ssm as ssm,
+    aws_secretsmanager as secretsmanager,
     aws_logs as logs
 )
 from constructs import Construct
@@ -20,8 +19,8 @@ class ECSStack(Stack):
         scope: Construct,
         construct_id: str,
         vpc: ec2.Vpc,
+        database_secrets: secretsmanager.ISecret,
         ecs_cluster: ecs.Cluster,
-        secrets: dict,
         task_cpu: int = 256,
         task_memory_mib: int = 1024,
         task_desired_count: int = 2,
@@ -32,8 +31,8 @@ class ECSStack(Stack):
 
         super().__init__(scope, construct_id, **kwargs)
         self.vpc = vpc
+        self.database_secrets = database_secrets
         self.ecs_cluster = ecs_cluster
-        self.secrets = secrets
         self.task_cpu = task_cpu
         self.task_memory_mib = task_memory_mib
         self.task_desired_count = task_desired_count
@@ -41,7 +40,10 @@ class ECSStack(Stack):
         self.task_max_scaling_capacity = task_max_scaling_capacity
 
         # Prepare parameters
+
+        uid = uuid.uuid4().hex[:6].upper()
         self.container_name = f"django_app"
+        self.unique_secret_name = "DjangoSecretAppKey"+uid
 
         self.log_group = logs.LogGroup(
             self,
@@ -51,10 +53,47 @@ class ECSStack(Stack):
             retention=logs.RetentionDays.ONE_DAY
         )
 
+        self.newKey = secretsmanager.Secret(
+            self,
+            "DjangoSecretAppKey",
+            secret_name=self.unique_secret_name,
+            generate_secret_string=secretsmanager.SecretStringGenerator(
+                secret_string_template="{}", generate_string_key="SecretKey", exclude_punctuation=True
+            )
+        )
+
+        self.secretKey = secretsmanager.Secret.from_secret_name_v2(
+            self, "DjangoKeySecret", secret_name=self.unique_secret_name)
+
+        # Set the secrets in the container as environment variables
+        self.app_secrets = {
+            "SECRET_KEY": ecs.Secret.from_secrets_manager(self.secretKey, field="SecretKey"),
+            "HOST": ecs.Secret.from_secrets_manager(
+                database_secrets,
+                field="host"
+            ),
+            "PORT": ecs.Secret.from_secrets_manager(
+                database_secrets,
+                field="port"
+            ),
+            "DB_NAME": ecs.Secret.from_secrets_manager(
+                database_secrets,
+                field="dbname"
+            ),
+            "USERNAME": ecs.Secret.from_secrets_manager(
+                database_secrets,
+                field="username"
+            ),
+            "PASSWORD": ecs.Secret.from_secrets_manager(
+                database_secrets,
+                field="password"
+            )
+        }
+
         # Create the load balancer, ECS service and fargate task for teh Django App
         self.alb_fargate_service = ecs_patterns.ApplicationLoadBalancedFargateService(
             self,
-            "MyDjangoApp",
+            "DjangoToDoApp",
             protocol=elbv2.ApplicationProtocol.HTTP,
             redirect_http=False,
             platform_version=ecs.FargatePlatformVersion.VERSION1_4,
@@ -71,10 +110,10 @@ class ECSStack(Stack):
                 ),
                 container_name=self.container_name,
                 container_port=8000,
-                secrets=self.secrets,
+                secrets=self.app_secrets,
                 log_driver=ecs.LogDriver.aws_logs(
-                   log_group=self.log_group,
-                   stream_prefix=f"DjangoAppTest",
+                    log_group=self.log_group,
+                    stream_prefix=f"DjangoToDoApp",
                 )
             ),
             public_load_balancer=True
@@ -94,34 +133,3 @@ class ECSStack(Stack):
             f"CpuScaling",
             target_utilization_percent=75,
         )
-        # Save useful values in in SSM
-        # self.ecs_cluster_name_param = ssm.StringParameter(
-        #     self,
-        #     "EcsClusterNameParam",
-        #     parameter_name=f"EcsClusterNameParam",
-        #     string_value=self.ecs_cluster.cluster_name
-        # )
-        # self.task_def_arn_param = ssm.StringParameter(
-        #     self,
-        #     "TaskDefArnParam",
-        #     parameter_name=f"TaskDefArnParam",
-        #     string_value=self.alb_fargate_service.task_definition.task_definition_arn
-        # )
-        # self.task_def_family_param = ssm.StringParameter(
-        #     self,
-        #     "TaskDefFamilyParam",
-        #     parameter_name=f"TaskDefFamilyParam",
-        #     string_value=f"family:{self.alb_fargate_service.task_definition.family}"
-        # )
-        # self.exec_role_arn_param = ssm.StringParameter(
-        #     self,
-        #     "TaskExecRoleArnParam",
-        #     parameter_name=f"TaskExecRoleArnParam",
-        #     string_value=self.alb_fargate_service.task_definition.execution_role.role_arn
-        # )
-        # self.task_role_arn_param = ssm.StringParameter(
-        #     self,
-        #     "TaskRoleArnParam",
-        #     parameter_name=f"TaskRoleArnParam",
-        #     string_value=self.alb_fargate_service.task_definition.task_role.role_arn
-        # )

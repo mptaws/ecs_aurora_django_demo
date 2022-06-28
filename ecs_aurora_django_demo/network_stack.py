@@ -12,7 +12,6 @@ class NetworkStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # Our network in the cloud
         self.vpc = ec2.Vpc(
             self,
             "VPC",
@@ -23,12 +22,6 @@ class NetworkStack(Stack):
         )
         self.ecs_cluster = ecs.Cluster(self, f"ECSCluster", vpc=self.vpc)
 
-        self.s3_private_link = ec2.GatewayVpcEndpoint(
-            self,
-            "S3GWEndpoint",
-            vpc=self.vpc,
-            service=ec2.GatewayVpcEndpointAwsService.S3
-        )
         # Create a security group for our endpoints
         security_group = ec2.SecurityGroup(
             self, "ECR-SG",
@@ -42,6 +35,13 @@ class NetworkStack(Stack):
             ec2.Port.tcp(443)
         )
 
+        #Needed to pull container image to ECR
+        self.s3_private_link = ec2.GatewayVpcEndpoint(
+            self,
+            "S3GWEndpoint",
+            vpc=self.vpc,
+            service=ec2.GatewayVpcEndpointAwsService.S3
+        )
         self.ecr_api_private_link = ec2.InterfaceVpcEndpoint(
             self,
             "ECRapiEndpoint",
@@ -66,14 +66,6 @@ class NetworkStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
             )
         )
-        self.cloudwatch_private_link = ec2.InterfaceVpcEndpoint(
-            self,
-            "CloudWatchEndpoint",
-            vpc=self.vpc,
-            service=ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
-            open=True,
-            private_dns_enabled=True
-        )
         self.secrets_manager_private_link = ec2.InterfaceVpcEndpoint(
             self,
             "SecretsManagerEndpoint",
@@ -82,20 +74,13 @@ class NetworkStack(Stack):
             open=True,
             private_dns_enabled=True
         )
-
-        # # Save useful info in SSM for later usage
-        # ssm.StringParameter(
-        #     self,
-        #     "VpcIdParam",
-        #     parameter_name=f"VpcId",
-        #     string_value=self.vpc.vpc_id
-        # )
-        # self.task_subnets = ssm.StringListParameter(
-        #     self,
-        #     "VpcPrivateSubnetsParam",
-        #     parameter_name=f"VpcPrivateSubnetsParam",
-        #     string_list_value=[
-        #         s.subnet_id
-        #         for s in self.vpc.select_subnets(subnet_type=ec2.SubnetType.PRIVATE_ISOLATED).subnets
-        #     ]
-        # )
+        
+        #Needed for  health metrics to connect to Cloudwatch in private subnet
+        self.cloudwatch_private_link = ec2.InterfaceVpcEndpoint(
+            self,
+            "CloudWatchEndpoint",
+            vpc=self.vpc,
+            service=ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
+            open=True,
+            private_dns_enabled=True
+        )
