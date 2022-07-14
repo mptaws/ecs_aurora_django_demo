@@ -29,9 +29,9 @@ database = DatabaseStack(
     env=aws_env,
     vpc=vpc.vpc,
     database_name="app_db",
-    min_capacity=rds.AuroraCapacityUnit.ACU_2,
+    min_capacity=rds.AuroraCapacityUnit.ACU_1,
     max_capacity=rds.AuroraCapacityUnit.ACU_2,
-    auto_pause_minutes=10,
+    auto_pause_minutes=60,
 )
 
 ECSStack(
@@ -44,8 +44,8 @@ ECSStack(
     task_cpu=256,
     task_memory_mib=512,
     task_desired_count=2,
-    task_min_scaling_capacity=2,
-    task_max_scaling_capacity=4,
+    task_min_scaling_capacity=1,
+    task_max_scaling_capacity=2,
 )
 
 app.synth()

@@ -1,44 +1,24 @@
 
 # Django ECS Application Demo
 
-![Architecture Diagram](ECS-Aurora-Serverless.png)
+<img src="ECS-Aurora-Serverless.png" width=800 height=600 />
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
+## Prerequisites
 
-To manually create a virtualenv on MacOS and Linux:
+* NodeJS v14 or later
+* Python v3.7 or later
+* Docker Desktop installed and running locally
+* AWS CDK v2 installed `npm install -g aws-cdk`
+* If you have never used CDK before, run `cdk bootstrap`
+* Git v2 or later
+* AWS CLI 2.7 or later with account ID and secret key configured `aws configure`
 
-```bash
-python3 -m venv .venv
-```
+## After cloning the repository, go into the repo folder
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
-
-```bash
-source .venv/bin/activate
-```
-
-If you are a Windows platform, you would activate the virtualenv like this:
-
-```bash
-.venv\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
-``` bash
-pip install -r requirements.txt
-```
-
-At this point you can now synthesize & deploy the CloudFormation template for this code.
-
-``` bash
-cdk deploy --all
-```
+* Create a virtual environment: `python3 -m venv .venv`
+* Activate the virtual environment `source .venv/bin/activate`
+* Install requirements: `pip install -r requirements.txt`
+* Run `cdk synth`
+* To deploy the Django app `cdk deploy --all`

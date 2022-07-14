@@ -1,7 +1,6 @@
 from aws_cdk import (
     Stack,
     aws_ec2 as ec2,
-    aws_ssm as ssm,
     aws_ecs as ecs,
 )
 from constructs import Construct
@@ -29,13 +28,7 @@ class NetworkStack(Stack):
             allow_all_outbound=True
         )
 
-        # Allow 443 inbound on our Security Group
-        security_group.add_ingress_rule(
-            ec2.Peer.ipv4(self.vpc.vpc_cidr_block),
-            ec2.Port.tcp(443)
-        )
-
-        #Needed to pull container image to ECR
+        # Needed to pull container image to ECR
         self.s3_private_link = ec2.GatewayVpcEndpoint(
             self,
             "S3GWEndpoint",
@@ -70,16 +63,18 @@ class NetworkStack(Stack):
             self,
             "SecretsManagerEndpoint",
             vpc=self.vpc,
+            security_groups=[security_group],
             service=ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
             open=True,
             private_dns_enabled=True
         )
-        
-        #Needed for  health metrics to connect to Cloudwatch in private subnet
+
+        # Needed for  health metrics to connect to Cloudwatch in private subnet
         self.cloudwatch_private_link = ec2.InterfaceVpcEndpoint(
             self,
             "CloudWatchEndpoint",
             vpc=self.vpc,
+            security_groups=[security_group],
             service=ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
             open=True,
             private_dns_enabled=True

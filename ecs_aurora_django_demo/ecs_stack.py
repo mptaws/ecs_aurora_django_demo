@@ -45,14 +45,6 @@ class ECSStack(Stack):
         self.container_name = f"django_app"
         self.unique_secret_name = "DjangoSecretAppKey"+uid
 
-        self.log_group = logs.LogGroup(
-            self,
-            "ECSLogGroup",
-            log_group_name=f"ECSLogGroup",
-            removal_policy=RemovalPolicy.DESTROY,
-            retention=logs.RetentionDays.ONE_DAY
-        )
-
         self.newKey = secretsmanager.Secret(
             self,
             "DjangoSecretAppKey",
@@ -89,6 +81,15 @@ class ECSStack(Stack):
                 field="password"
             )
         }
+
+        # Create Log Group for Cluster
+        self.log_group = logs.LogGroup(
+            self,
+            "ECSLogGroup",
+            log_group_name=f"ECSLogGroup",
+            removal_policy=RemovalPolicy.DESTROY,
+            retention=logs.RetentionDays.ONE_DAY
+        )
 
         # Create the load balancer, ECS service and fargate task for teh Django App
         self.alb_fargate_service = ecs_patterns.ApplicationLoadBalancedFargateService(
